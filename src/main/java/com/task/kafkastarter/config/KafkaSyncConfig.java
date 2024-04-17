@@ -1,17 +1,13 @@
 package com.task.kafkastarter.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.task.kafkastarter.service.KafkaConsumerService;
-import com.task.kafkastarter.service.KafkaProducerService;
-import com.task.kafkastarter.service.RestService;
-import com.task.kafkastarter.service.impl.KafkaConsumerServiceImpl;
-import com.task.kafkastarter.service.impl.KafkaProducerServiceImpl;
-import com.task.kafkastarter.service.impl.RestServiceImpl;
+import com.task.kafkastarter.service.KafkaProducerServiceImpl;
+import com.task.kafkastarter.service.RestServiceImpl;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.ssl.SslBundles;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,16 +19,17 @@ import org.springframework.kafka.support.JacksonUtils;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
 @Configuration
+@EnableConfigurationProperties(KafkaSyncProperties.class)
 public class KafkaSyncConfig {
 
-    public static String TOPIC;
+//    public static String TOPIC;
 
-    public KafkaSyncConfig(@Value("${kafka.sync.starter.topic}") String topicName) {
-        if (topicName.isBlank()) {
-            topicName = "demo-topic";
-        }
-        KafkaSyncConfig.TOPIC = topicName;
-    }
+//    public KafkaSyncConfig(@Value("${kafka.sync.starter.topic}") String topicName) {
+//        if (topicName.isBlank()) {
+//            topicName = "demo-topic";
+//        }
+//        KafkaSyncConfig.TOPIC = topicName;
+//    }
 
 //    @Bean("PropertyTopic")
 //    @ConditionalOnProperty(prefix = "kafka.sync.starter", name = "topic")
@@ -59,11 +56,11 @@ public class KafkaSyncConfig {
 
     @Bean
     public ProducerFactory<String, String> producerFactory(
-        KafkaProperties kafkaProperties, ObjectMapper mapper) {
+        KafkaProperties kafkaProperties, ObjectMapper mapper, KafkaSyncProperties kafkaSyncProperties) {
         var props = kafkaProperties.buildProducerProperties((SslBundles) null);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
 
         var kafkaProducerFactory = new DefaultKafkaProducerFactory<String, String>(props);
         kafkaProducerFactory.setValueSerializer(new JsonSerializer<>(mapper));
@@ -76,20 +73,18 @@ public class KafkaSyncConfig {
     }
 
     @Bean
-    public NewTopic topic() {
-        return TopicBuilder.name(TOPIC).partitions(1).replicas(1).build();
+    public NewTopic topic(KafkaSyncProperties kafkaSyncProperties) {
+        return TopicBuilder.name(kafkaSyncProperties.getTopic()).partitions(1).replicas(1).build();
     }
 
     @Bean
-    public KafkaProducerService kafkaProducerService(KafkaTemplate<String, String> kafkaTemplate) {
-        KafkaProducerServiceImpl kafkaProducerService = new KafkaProducerServiceImpl(kafkaTemplate);
-        return (KafkaProducerService) kafkaProducerService;
+    public KafkaProducerServiceImpl kafkaProducerService(KafkaTemplate<String, String> kafkaTemplate, KafkaSyncProperties kafkaSyncProperties) {
+        return new KafkaProducerServiceImpl(kafkaSyncProperties, kafkaTemplate);
     }
 
     @Bean
-    public RestService restService(KafkaProducerService kafkaProducerService, ObjectMapper objectMapper) {
-        RestServiceImpl restService = new RestServiceImpl(new ObjectMapper(), kafkaProducerService);
-        return (RestService) restService;
+    public RestServiceImpl restService(KafkaProducerServiceImpl kafkaProducerService, ObjectMapper objectMapper) {
+        return new RestServiceImpl(new ObjectMapper(), kafkaProducerService);
     }
 
 //    @Bean

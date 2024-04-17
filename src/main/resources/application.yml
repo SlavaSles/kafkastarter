@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: kafkastarter
+kafka-sync-starter:
+  topic: "demo-topic"
+  bootstrap-servers: "localhost:9092"
+  group-id: "consumer-group1"

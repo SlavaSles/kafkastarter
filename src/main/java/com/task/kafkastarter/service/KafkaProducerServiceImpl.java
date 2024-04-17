@@ -1,8 +1,6 @@
-package com.task.kafkastarter.service.impl;
+package com.task.kafkastarter.service;
 
-import com.task.kafkastarter.config.KafkaSyncConfig;
-import com.task.kafkastarter.config.KafkaTopic;
-import com.task.kafkastarter.service.KafkaProducerService;
+import com.task.kafkastarter.config.KafkaSyncProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -13,17 +11,14 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class KafkaProducerServiceImpl implements KafkaProducerService {
+public class KafkaProducerServiceImpl {
 
-//    private final KafkaTopic kafkaTopic;
-
-//    private final String topic;
+    private final KafkaSyncProperties kafkaSyncProperties;
 
     private final KafkaTemplate<String, String> kafkaTemplate;
 
-    @Override
     public void send(String exchangerUuid, String message) {
-        ProducerRecord<String, String> record = new ProducerRecord<>(KafkaSyncConfig.TOPIC, message);
+        ProducerRecord<String, String> record = new ProducerRecord<>(kafkaSyncProperties.getTopic(), message);
         record.headers().add(new RecordHeader("exchangerId", exchangerUuid.getBytes()));
         try {
             kafkaTemplate.send(record).whenComplete(

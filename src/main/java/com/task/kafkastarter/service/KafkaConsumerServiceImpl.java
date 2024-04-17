@@ -1,7 +1,5 @@
-package com.task.kafkastarter.service.impl;
+package com.task.kafkastarter.service;
 
-import com.task.kafkastarter.service.KafkaConsumerService;
-import com.task.kafkastarter.service.RestService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -13,9 +11,9 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class KafkaConsumerServiceImpl implements KafkaConsumerService {
+public class KafkaConsumerServiceImpl{
 
-    private final RestService restService;
+    private final RestServiceImpl restService;
 
     @KafkaListener(topics = "demo-topic", groupId = "consumer-group1")
     public void listen(ConsumerRecord<String, String> record) {

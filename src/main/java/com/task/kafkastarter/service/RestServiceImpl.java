@@ -1,11 +1,9 @@
-package com.task.kafkastarter.service.impl;
+package com.task.kafkastarter.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.task.kafkastarter.dto.RequestDto;
 import com.task.kafkastarter.dto.ResponseDto;
-import com.task.kafkastarter.service.KafkaProducerService;
-import com.task.kafkastarter.service.RestService;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,13 +17,13 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class RestServiceImpl implements RestService {
+public class RestServiceImpl {
 
     private final Map<String, Exchanger<Object>> exchangerMap = new ConcurrentHashMap<>();
 
     private final ObjectMapper objectMapper;
 
-    private final KafkaProducerService kafkaProducerService;
+    private final KafkaProducerServiceImpl kafkaProducerService;
 
     public ResponseDto sendMessage(RequestDto requestDto) {
         Exchanger<Object> exchanger = new Exchanger<>();
