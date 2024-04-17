@@ -1,2 +1,2 @@
-# kafkastarter
+# Kafkastarter
 Kafka Sync REST starter
