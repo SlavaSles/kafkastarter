@@ -49,6 +49,18 @@ public class KafkaSyncConfig {
 //        return kafkaTopic;
 //    }
 
+//    @Bean
+//    @ConditionalOnMissingBean
+//    public RequestDto requestDto() {
+//        return new RequestDto("abcd");
+//    }
+//
+//    @Bean
+//    @ConditionalOnMissingBean
+//    public ResponseDto responseDto() {
+//        return new ResponseDto("efgh");
+//    }
+
     @Bean
     public ObjectMapper objectMapper() {
         return JacksonUtils.enhancedObjectMapper();
@@ -57,7 +69,7 @@ public class KafkaSyncConfig {
     @Bean
     public ProducerFactory<String, String> producerFactory(
         KafkaProperties kafkaProperties, ObjectMapper mapper, KafkaSyncProperties kafkaSyncProperties) {
-        var props = kafkaProperties.buildProducerProperties((SslBundles) null);
+        var props = kafkaProperties.buildProducerProperties(null);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
@@ -78,13 +90,13 @@ public class KafkaSyncConfig {
     }
 
     @Bean
-    public KafkaProducerServiceImpl kafkaProducerService(KafkaTemplate<String, String> kafkaTemplate, KafkaSyncProperties kafkaSyncProperties) {
+    public KafkaProducerServiceImpl kafkaProducerServiceImpl(KafkaTemplate<String, String> kafkaTemplate, KafkaSyncProperties kafkaSyncProperties) {
         return new KafkaProducerServiceImpl(kafkaSyncProperties, kafkaTemplate);
     }
 
     @Bean
-    public RestServiceImpl restService(KafkaProducerServiceImpl kafkaProducerService, ObjectMapper objectMapper) {
-        return new RestServiceImpl(new ObjectMapper(), kafkaProducerService);
+    public RestServiceImpl restServiceImpl(KafkaProducerServiceImpl kafkaProducerServiceImpl, ObjectMapper objectMapper) {
+        return new RestServiceImpl(new ObjectMapper(), kafkaProducerServiceImpl);
     }
 
 //    @Bean

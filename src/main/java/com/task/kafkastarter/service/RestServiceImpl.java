@@ -12,10 +12,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 @Slf4j
-@Service
 @RequiredArgsConstructor
 public class RestServiceImpl {
 
@@ -45,8 +43,10 @@ public class RestServiceImpl {
         if (exchangerMap.containsKey(exchangerUuid)) {
             log.info("RestService receive message = {}", message);
             try {
-                RequestDto requestDto = objectMapper.readValue(message, RequestDto.class);
+                RequestDto requestDto = objectMapper. readValue(message, RequestDto.class);
+                log.info("Message convert to RequestDto = {}", requestDto);
                 ResponseDto responseDto = new ResponseDto(requestDto.getMessage());
+                log.info("Message convert to ResponseDto = {}", responseDto);
                 Exchanger<Object> exchanger = exchangerMap.get(exchangerUuid);
                 exchanger.exchange(responseDto, 5_000, TimeUnit.MILLISECONDS);
             } catch (InterruptedException | TimeoutException | JsonProcessingException e) {
