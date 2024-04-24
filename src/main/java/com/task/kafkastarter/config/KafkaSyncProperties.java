@@ -9,9 +9,13 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "kafka-sync-starter")
 public class KafkaSyncProperties {
 
-    private String topic;
+    private TopicConfig producer;
+
+    private TopicConfig consumer;
 
     private String bootstrapServers;
 
     private String groupId;
+
+    private Long timeout;
 }
