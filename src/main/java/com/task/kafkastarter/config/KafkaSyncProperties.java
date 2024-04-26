@@ -18,4 +18,35 @@ public class KafkaSyncProperties {
     private String groupId;
 
     private Long timeout;
+
+    public TopicConfig getConsumer() {
+        if (consumer != null) {
+            if (consumer.getPartitions() == null) {
+                consumer.setPartitions(1);
+            }
+            if (consumer.getReplicas() == null) {
+                consumer.setReplicas(1);
+            }
+        }
+        return consumer;
+    }
+
+    public TopicConfig getProducer() {
+        if (producer != null) {
+            if (producer.getPartitions() == null) {
+                producer.setPartitions(1);
+            }
+            if (producer.getReplicas() == null) {
+                producer.setReplicas(1);
+            }
+        }
+        return producer;
+    }
+
+    public Long getTimeout() {
+        if (timeout == null) {
+            return 5_000L;
+        }
+        return timeout;
+    }
 }

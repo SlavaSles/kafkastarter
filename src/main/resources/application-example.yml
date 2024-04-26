@@ -1,3 +1,5 @@
+#Example of configuration for kafka-sync-starter
+
 kafka-sync-starter:
   producer:
     topic: "demo-topic"
@@ -10,3 +12,4 @@ kafka-sync-starter:
   bootstrap-servers: "localhost:9092"
   group-id: "consumer-group1"
   timeout: 5000
+  create-topic: true

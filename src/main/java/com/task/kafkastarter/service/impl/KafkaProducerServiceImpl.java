@@ -1,12 +1,11 @@
 package com.task.kafkastarter.service.impl;
 
+import com.task.kafkastarter.exception.KafkaStarterException;
 import com.task.kafkastarter.service.KafkaProducerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.internals.RecordHeader;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -14,17 +13,14 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class KafkaProducerServiceImpl implements KafkaProducerService {
+    
+    private final String topicName;
 
-    @Qualifier("producer")
-    private final NewTopic producerTopic;
-
-    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @Override
-    public void sendMessage(String exchangerUuid, String message, String HEADER_NAME) {
-        ProducerRecord<String, String> record = new ProducerRecord<>(
-            producerTopic.name(),
-            message);
+    public void sendMessage(String exchangerUuid, Object message, String HEADER_NAME) {
+        ProducerRecord<String, Object> record = new ProducerRecord<>(topicName, message);
         record.headers().add(new RecordHeader(HEADER_NAME, exchangerUuid.getBytes()));
         try {
             kafkaTemplate.send(record).whenComplete(
@@ -34,11 +30,11 @@ public class KafkaProducerServiceImpl implements KafkaProducerService {
                             result.getRecordMetadata().offset(), exchangerUuid);
                     } else {
                         log.error("Message {} with id = {} was not sent", message, exchangerUuid);
-                        System.err.println("message: " + message + " was not sent " + ex.getMessage());
                     }
                 });
         } catch (Exception ex) {
             log.error("Sending error for message {} with id = {}. Error: {}", message, exchangerUuid, ex.getMessage());
+            throw new KafkaStarterException(ex);
         }
     }
 }
