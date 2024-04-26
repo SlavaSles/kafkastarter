@@ -1,7 +1,6 @@
 package com.task.kafkastarter.service.impl;
 
-import com.task.kafkastarter.config.KafkaSyncConfig;
-import com.task.kafkastarter.config.KafkaTopic;
+import com.task.kafkastarter.exception.KafkaStarterException;
 import com.task.kafkastarter.service.KafkaProducerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,17 +13,15 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class KafkaProducerServiceImpl implements KafkaProducerService {
+    
+    private final String topicName;
 
-//    private final KafkaTopic kafkaTopic;
-
-//    private final String topic;
-
-    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @Override
-    public void send(String exchangerUuid, String message) {
-        ProducerRecord<String, String> record = new ProducerRecord<>(KafkaSyncConfig.TOPIC, message);
-        record.headers().add(new RecordHeader("exchangerId", exchangerUuid.getBytes()));
+    public void sendMessage(String exchangerUuid, Object message, String HEADER_NAME) {
+        ProducerRecord<String, Object> record = new ProducerRecord<>(topicName, message);
+        record.headers().add(new RecordHeader(HEADER_NAME, exchangerUuid.getBytes()));
         try {
             kafkaTemplate.send(record).whenComplete(
                 (result, ex) -> {
@@ -37,6 +34,7 @@ public class KafkaProducerServiceImpl implements KafkaProducerService {
                 });
         } catch (Exception ex) {
             log.error("Sending error for message {} with id = {}. Error: {}", message, exchangerUuid, ex.getMessage());
+            throw new KafkaStarterException(ex);
         }
     }
 }
